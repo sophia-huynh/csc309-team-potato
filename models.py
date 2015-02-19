@@ -51,4 +51,16 @@ class Rating(models.Model):
     rid = models.AutoField(primary_key = True)
     rating = models.IntegerField(choices = RATING_CHOICES, default = 3)
     comment = models.TextField(max_length = 500)
-    
+
+class Funder(models.Model):
+	uid = models.ForeignKey(‘User’)
+	pid = models.ForeignKey(‘User’)
+	amount = models.IntegerField()
+
+class Buyer(models.Model):
+	uid = models.ForeignKey(‘User’)
+	pid = models.ForeignKey(‘User’)
+
+class Initiator(models.Model):
+	uid = models.ForeignKey(‘User’)
+	pid = models.ForeignKey(‘User’)
