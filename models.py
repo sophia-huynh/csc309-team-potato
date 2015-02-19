@@ -64,3 +64,7 @@ class Buyer(models.Model):
 class Initiator(models.Model):
 	uid = models.ForeignKey(‘User’)
 	pid = models.ForeignKey(‘User’)
+
+class Friend(models.Model):
+	uid = models.ForeignKey(‘User’)
+	friend = uid = models.ForeignKey(‘User’)
