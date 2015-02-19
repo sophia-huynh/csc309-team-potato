@@ -68,3 +68,12 @@ class Initiator(models.Model):
 class Friend(models.Model):
 	uid = models.ForeignKey(‘User’)
 	friend = uid = models.ForeignKey(‘User’)
+
+class Community(models.Model):
+	cid = models.AutoField(primary_key=True)
+	name = models.CharField(max_length = 50)
+	
+class UserCommunity(models.Model):
+	cid = models.ForeignKey(‘Community’)
+	uid = models.ForeignKey(‘User’)
+	
