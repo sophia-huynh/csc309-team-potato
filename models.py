@@ -73,6 +73,9 @@ class Community(models.Model):
 	cid = models.AutoField(primary_key=True)
 	name = models.CharField(max_length = 50)
 	
+	def __str__(self):
+       	    return "{}: {}".format(self.cid, self.name)
+	
 class UserCommunity(models.Model):
 	cid = models.ForeignKey(‘Community’)
 	uid = models.ForeignKey(‘User’)
