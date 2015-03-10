@@ -17,6 +17,8 @@ div {
   font-size: 16px;
 }
 
+a { color: inherit; }
+
 /*
   ===== Content divs =======================================
 */
@@ -33,10 +35,87 @@ div {
 }
 
 .contentwrapper{
-  width: 80%;
+  width: 70%;
   margin-top: 10px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/*
+  ===== Dashboard div =====================================
+*/
+.post{
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 900px;
+  min-height: 300px;
+  overflow: hidden;
+  border-bottom: 1px solid #AAAAAA;
+}
+
+.post h1{
+  font-size: 24px;
+  word-wrap: break-word;
+}
+
+.description{
+  height: 250px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.daysleft{
+  width: 160px;
+  float: right;
+  text-align: right;
+  font-size: 20px;
+}
+
+.fundedamount{
+  width: 200px;
+  float: right;
+  text-align: right;
+  font-size: 20px;
+}
+
+.postimage{
+  height: 300px;
+  width: 300px;
+  margin-right:5px;
+  float: left;
+}
+
+.post img{
+  max-height: 300px;
+  max-width: 300px;
+}
+
+/*
+  ===== Community Tag =======================================
+*/
+.tag{
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  
+  position: relative;
+  display: inline-block;
+  max-width: 240px;
+  min-height: 30px;
+  
+  /* Spacing within tab */
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  
+  
+  /* font */
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 18px;
+  word-wrap: break-word;
+  
+  background: #bddeef;
 }
 
 /*

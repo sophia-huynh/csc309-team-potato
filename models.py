@@ -53,21 +53,21 @@ class Rating(models.Model):
     comment = models.TextField(max_length = 500)
 
 class Funder(models.Model):
-	uid = models.ForeignKey(‘User’)
-	pid = models.ForeignKey(‘User’)
+	uid = models.ForeignKey("User")
+	pid = models.ForeignKey("User")
 	amount = models.IntegerField()
 
 class Buyer(models.Model):
-	uid = models.ForeignKey(‘User’)
-	pid = models.ForeignKey(‘User’)
+	uid = models.ForeignKey("User")
+	pid = models.ForeignKey("User")
 
 class Initiator(models.Model):
-	uid = models.ForeignKey(‘User’)
-	pid = models.ForeignKey(‘User’)
+	uid = models.ForeignKey("User")
+	pid = models.ForeignKey("User")
 
 class Friend(models.Model):
-	uid = models.ForeignKey(‘User’)
-	friend = uid = models.ForeignKey(‘User’)
+	uid = models.ForeignKey("User")
+	friend = uid = models.ForeignKey("User")
 
 class Community(models.Model):
 	cid = models.AutoField(primary_key=True)
@@ -77,6 +77,6 @@ class Community(models.Model):
        	    return "{}: {}".format(self.cid, self.name)
 	
 class UserCommunity(models.Model):
-	cid = models.ForeignKey(‘Community’)
-	uid = models.ForeignKey(‘User’)
+	cid = models.ForeignKey("Community")
+	uid = models.ForeignKey("User")
 	
