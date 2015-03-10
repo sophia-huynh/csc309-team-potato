@@ -1,0 +1,38 @@
+INSERT INTO Users(email, password) VALUES ('sputnik@bob.com', 'abcdef');
+INSERT INTO Users(email, password) VALUES ('apple@live.com', 'abcdef');
+
+INSERT INTO UserPosts VALUES (1, 'Potato', 'http://puu.sh/guUKt/7e706123c1.png');
+INSERT INTO UserPosts VALUES (2, 'Apple', 'http://puu.sh/guUN4/e8a39af322.png');
+
+INSERT INTO UserProfile VALUES (1, 'Potatos blog is here hooray!!!!');
+INSERT INTO UserProfile VALUES (2, 'Apple has a lot to say but she doesnt have the room to say it which is unfortunate so oh well!!! S> ILBIS 50M @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+
+INSERT INTO Project(name, goal, startdate, enddate, description, image, product, donation) VALUES ('Potato Snax', 500, (select TIMESTAMP 'yesterday'), now(), 'Description for PotatoSnax', 'http://puu.sh/guVC0/a1d66550dc.png', False, True);
+INSERT INTO Project(name, goal, startdate, enddate, description, image, product, donation) VALUES ('Apple Snax', 2500, (select TIMESTAMP 'yesterday'), (select TIMESTAMP 'tomorrow' + interval '5 days'), 'Description for AppleSnax', 'http://puu.sh/guVJ5/29f9cda346.png', True, True);
+INSERT INTO Project(name, goal, startdate, enddate, description, image, product, donation) VALUES ('Peeta Snax', 2500, (select TIMESTAMP 'yesterday'), (select TIMESTAMP 'tomorrow' + interval '10 days'), 'Description for Peeta', 'http://puu.sh/guVKv/4e965910e1.png', True, False);
+
+INSERT INTO Funder VALUES (2, 1, 100);
+INSERT INTO Funder VALUES (1, 2, 500);
+INSERT INTO Buyer VALUES (1, 2, 500);
+
+INSERT INTO Initiator VALUES (1, 1);
+INSERT INTO Initiator VALUES (2, 2);
+INSERT INTO Initiator VALUES (1, 3);
+
+INSERT INTO UserReview(uid, reviewer, rating, review) VALUES (2, 1, 5, 'Good.');
+INSERT INTO ProjectReview(pid, uid, rating, review) VALUES (1, 2, 3, 'Okay.');
+
+INSERT INTO Community(name) VALUES ('Potato for Snacks');
+INSERT INTO Community(name) VALUES ('Apples for Aces');
+INSERT INTO Community(name) VALUES ('Hungry Games');
+
+INSERT INTO UserCommunity VALUES (1, 1);
+INSERT INTO UserCommunity VALUES (2, 2);
+INSERT INTO UserCommunity VALUES (3, 1);
+
+INSERT INTO ProjectCommunity VALUES (1, 1);
+INSERT INTO ProjectCommunity VALUES (2, 2);
+INSERT INTO ProjectCommunity VALUES (3, 3);
+
+INSERT INTO Friend VALUES (1, 2);
+INSERT INTO Admins VALUES (1);
