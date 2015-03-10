@@ -76,6 +76,7 @@ function test_input($data) {
    <br><br>
    Project Image URL: <input type="text" name="url" value="<?php echo $url;?>">
    <span class="error"><?php echo $urlErr;?></span>
+   <img src="<?php echo $url;?>" alt="imageurl" style="width:104px;height:142px">
    <br><br>
    Project Description: <textarea name="descr" rows="5" cols="40"><?php echo $descr;?></textarea>
    <span class="error">* <?php echo $descrErr;?></span>
