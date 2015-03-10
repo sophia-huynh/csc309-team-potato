@@ -45,7 +45,7 @@ function test_input($data) {
    E-mail: <input type="text" name="email" value="<?php echo $email;?>">
    <span class="error">* <?php echo $emailErr;?></span>
    <br><br>
-   Password: <input type="text" name="pass" value="<?php echo $password;?>">
+   Password: <input type="password" name="pass" value="<?php echo $password;?>">
    <span class="error">* <?php echo $passErr;?></span>
    <br><br>
    <input type="submit" name="submit" value="Submit">
