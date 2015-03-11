@@ -1,3 +1,7 @@
+<?php
+    include 'db.php';
+    include 'functions.php';
+?>
 <html>
     <head>
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -17,3 +21,6 @@
         </script>
   </body>
 </html>
+<?php
+    closeDB($dbconn);
+?>

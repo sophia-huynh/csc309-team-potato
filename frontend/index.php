@@ -1,5 +1,6 @@
 <?php
     include 'db.php';
+    include 'functions.php';
 ?>
 <html>
     <head>
@@ -9,13 +10,18 @@
     <body>
         <?php
             include 'header.php';
-            include 'functions.php';
         ?>
 
         <?php
-            makePost($dbconn, 1);
-            makePost($dbconn, 2);
-            makePost($dbconn, 3);
+            $result = pg_query($dbconn, "SELECT pid FROM project " .
+                                        "ORDER BY startdate desc LIMIT 10");
+            if (!$result){
+                echo "An error occurred.\n";
+                exit;
+            }
+            while ($row = pg_fetch_row($result)) {
+                makePost($dbconn, $row[0], "Dashboard");
+            }
         ?>
         
         <?

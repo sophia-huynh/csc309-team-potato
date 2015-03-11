@@ -1,3 +1,7 @@
+<?php
+    include 'db.php';
+    include 'functions.php';
+?>
 <html>
     <head>
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -7,7 +11,20 @@
         <?php
             include 'header.php';
         ?>
-        hehh
+        <center>
+        <?php
+            $result = pg_query($dbconn, "SELECT cid, name FROM community LIMIT 10");
+            if (!$result){
+                echo "An error occurred.\n";
+                exit;
+            }
+            while ($row = pg_fetch_row($result)) {
+                $cid = $row[0];
+                $name = $row[1];
+                makeTag($cid, $name);
+            }
+        ?>
+        </center>
         <?
             include 'footer.php';
         ?>
@@ -17,3 +34,6 @@
         </script>
   </body>
 </html>
+<?php
+    closeDB($dbconn);
+?>

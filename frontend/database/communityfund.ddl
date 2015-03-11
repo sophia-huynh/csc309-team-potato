@@ -60,7 +60,7 @@ create table userreview(
 create table projectreview(
         rid SERIAL PRIMARY KEY,
         pid integer REFERENCES Project(pid),
-        uid integer REFERENCES Users(uid),
+        reviewer integer REFERENCES Users(uid),
         rating int,
         CONSTRAINT rating CHECK (rating IN (0, 1, 2, 3, 4, 5)),
         review varchar(1600)

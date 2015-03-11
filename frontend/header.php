@@ -1,7 +1,7 @@
 <!-- Header -->
 <div class="header">
     <div class="headercontent">
-        <img src="header.png" class="logo">
+        <a href="index.php"><img src="header.png" class="logo"></a>
     </div>
 </div>
 <!-- Tabs -->

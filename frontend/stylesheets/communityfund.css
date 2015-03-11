@@ -17,7 +17,56 @@ div {
   font-size: 16px;
 }
 
-a { color: inherit; }
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/*
+  ===== Rounded image div ==================================
+  Usage: <div class="outer"><div class="image">...</div></div>
+  From:
+  http://stackoverflow.com/questions/6856711/css-rounded-corners-on-an-image-problem
+*/
+
+.outer {
+    width: 100px;
+    height: 100px;
+    float: left;
+    margin: 5px;
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    overflow: hidden;
+}
+
+.outeruser{
+    width: 150px;
+    height: 150px;
+    float: left;
+    margin-right: 10px;
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    overflow: hidden;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    overflow: hidden;
+}
+
+.image img{
+    width:100%;
+    height:100%;
+}
 
 /*
   ===== Content divs =======================================
@@ -60,6 +109,7 @@ a { color: inherit; }
 
 .description{
   height: 250px;
+  word-wrap: break-word;
   overflow: hidden;
   margin-bottom: 5px;
 }
@@ -83,11 +133,68 @@ a { color: inherit; }
   width: 300px;
   margin-right:5px;
   float: left;
+  overflow: hidden;
 }
 
-.post img{
+.postimage img{
   max-height: 300px;
-  max-width: 300px;
+}
+
+/*
+  ===== Project Page ========================================
+*/
+.project{
+  width: 100%;
+  min-height: 300px;
+  word-wrap: break-word;
+}
+
+.projectdata{
+  display:block-inline;
+}
+
+.projectdata h1{
+  font-size: 24px;
+  word-wrap: break-word;
+}
+
+/*
+  ===== User Page ========================================
+*/
+
+.userpage{
+  width: 100%;
+  min-height: 170px;
+  word-wrap: break-word;
+}
+
+.usercontainer{
+  width: 100%;
+  overflow: auto;
+}
+
+/*
+  ===== Review Boxes ========================================
+*/
+.review{
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  
+  position: relative;
+  float: left;
+  width: 300px;
+  
+  /* Spacing within tab */
+  padding: 10px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  
+  /* font */
+  font-family: Verdana, Geneva, sans-serif;
+  word-wrap: break-word;
+  
+  background: #bddeef;
 }
 
 /*
@@ -108,7 +215,8 @@ a { color: inherit; }
   padding-bottom: 2px;
   padding-left: 10px;
   padding-right: 10px;
-  
+  margin-right: 5px;
+  margin-bottom: 5px;
   
   /* font */
   font-family: Verdana, Geneva, sans-serif;
@@ -116,6 +224,30 @@ a { color: inherit; }
   word-wrap: break-word;
   
   background: #bddeef;
+}
+
+.join{
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  
+  position: relative;
+  display: inline-block;
+  min-height: 30px;
+  
+  /* Spacing within tab */
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  
+  /* font */
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 18px;
+  color: #83b8e1;
+  
 }
 
 /*
