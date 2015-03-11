@@ -1,7 +1,10 @@
 <!-- Header -->
 <div class="header">
     <div class="headercontent">
-        <a href="index.php"><img src="header.png" class="logo"></a>
+        <a href="index.php"><img src="header.png" class="logo" align="left"></a>
+        <a href="login.php"><div class="headerbutton">Log In</div></a>
+        <br/>
+        <a href="register.php"><div class="headerbutton">Register</div></a>
     </div>
 </div>
 <!-- Tabs -->

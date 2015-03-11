@@ -312,7 +312,7 @@ a {
 .header {
   background: #AADDF6;
   color: #FFFFFF;
-  height: 100px;
+  overflow: auto;
   width: 100%;
 }
 
@@ -323,6 +323,28 @@ a {
 
 img.logo {
   width: 600px;
+}
+
+.headerbutton{
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  color: #83b8e1;
+  
+  position: relative;
+  display: inline-block;
+  
+  /* Spacing within tab */
+  padding: 5px;
+  
+  /* Spacing outside of tab */
+  margin-left: 10px;
+  margin-bottom: 5px;
+  
+  /* font */
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 16px;
 }
 
 /*

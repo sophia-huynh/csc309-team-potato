@@ -67,6 +67,9 @@
         $image = $row[1];
         $description = $row[2];
 
+        if (!$image)
+            $image = "http://puu.sh/gvwsH/2a681326a2.png";
+
         echo "<div class='userpage'>
                         <div class='outeruser'><div class='image'><img src=$image></div></div>
                         <div class='projectdata'><h1>$username</h1></div>
@@ -349,4 +352,85 @@
     function timeUntilEnd($enddate){
         return floor((strtotime($enddate) - time()) / (60*60*24));
     }
+/*
+===== FORM FUNCTIONS ===============================================
+    testInput($data)
+    tryLogin($dbconn, $email, $pass)
+    registerUser($dbconn, $name, $email, $pass)
+*/
+    /*
+    test_input($data)
+        Given data, test if it's valid.
+    */
+    function testInput($data) {
+       $data = trim($data);
+       $data = stripslashes($data);
+       $data = htmlspecialchars($data);
+       return $data;
+    }
+
+    /*
+    tryLogin($dbconn, $email, $pass)
+        Given a connection, test if the login and return an appropriate message.
+    */
+    function tryLogin($dbconn, $email, $pass) {
+       $result = pg_query($dbconn, "SELECT uid, password FROM users WHERE email = '$email'");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $row = pg_fetch_row($result);
+        if (!$row){
+            return "No such email found.";
+        }
+        $uid = $row[0];
+        $password = $row[1];
+        if ($password != $pass){
+            return "Invalid password.";
+        }
+
+        return "Success! Hello user $uid!";
+    }
+    
+    /*
+    registerUser($dbconn, $name, $email, $pass)
+        Given valid credentials, insert the user into the database or return an
+        appropriate error message.
+    */
+    function registerUser($dbconn, $name, $email, $pass){
+        $testEmail = pg_query($dbconn, "SELECT * FROM users WHERE email = '$email'");
+        if (!$testEmail){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $emailRow = pg_fetch_row($testEmail);
+        if ($emailRow){
+            return "Email already exists.";
+        }
+        
+        $testName = pg_query($dbconn, "SELECT * FROM userposts WHERE username = '$name'");
+        if (!$testName){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $nameRow = pg_fetch_row($testName);
+        if ($nameRow){
+            return "Username already exists.";
+        }
+
+        $insertUser = pg_query($dbconn, "INSERT INTO users(email, password) VALUES ('$email', '$pass')");
+        $getUid = pg_query($dbconn, "SELECT uid FROM users WHERE email = '$email'");
+        if (!$getUid){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $uidRow = pg_fetch_row($getUid);
+        $uid = $uidRow[0];
+        
+        $insertPosts = pg_query($dbconn, "INSERT INTO userposts VALUES ($uid, '$name', '')");
+        $insertProfile = pg_query($dbconn, "INSERT INTO userprofile VALUES ($uid, '')");
+
+        return "Success! Hello user $uid!";
+    }
 ?>
+
