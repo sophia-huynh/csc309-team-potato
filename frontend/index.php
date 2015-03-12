@@ -1,6 +1,5 @@
 <?php
-    include 'db.php';
-    include 'functions.php';
+    include 'imports/imports.php'
 ?>
 <html>
     <head>
@@ -12,6 +11,8 @@
             include 'header.php';
         ?>
 
+        <center><a href ='makeproject.php'><div class='tag'>Start a Project</div></a></center>
+        
         <?php
             $result = pg_query($dbconn, "SELECT pid FROM project " .
                                         "ORDER BY startdate desc LIMIT 10");

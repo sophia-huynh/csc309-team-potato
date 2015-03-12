@@ -1,6 +1,5 @@
 <?php
-    include 'db.php';
-    include 'functions.php';
+    include 'imports/imports.php';
 ?>
 <html>
     <head>
@@ -11,7 +10,6 @@
         <?php
             include 'header.php';
         ?>
-
         
         <?php
             $pid = $_GET['pid'];
@@ -23,6 +21,7 @@
                   <h4>Average: $average</h4>";
 
             // Gather reviews
+            echo "<center><a href ='makeprojectreview.php?pid=$pid'><div class='tag'>Write a Review</div></a></center>";
             displayReviews($dbconn, $pid, "Project");
         ?>
         

@@ -1,6 +1,5 @@
 <?php
-    include 'db.php';
-    include 'functions.php';
+    include 'imports/imports.php';
 ?>
 <html>
     <head>
@@ -12,6 +11,7 @@
             include 'header.php';
         ?>
         <center>
+        <a href ='makecommunity.php'><div class='tag'>Start a Community</div></a><br/>
         <?php
             $result = pg_query($dbconn, "SELECT cid, name FROM community LIMIT 10");
             if (!$result){

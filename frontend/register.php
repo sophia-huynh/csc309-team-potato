@@ -1,6 +1,5 @@
 <?php
-    include 'db.php';
-    include 'functions.php';
+    include 'imports/imports.php';
     
     // define variables and set to empty values
     $nameErr = $emailErr = $passErr = "";

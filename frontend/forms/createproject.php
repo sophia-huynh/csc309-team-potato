@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    if (empty($_POST["pname"])) {
      $pnameErr = "Project name is required";
    } else {
-     $pname = test_input($_POST["pname"]);
+     $pname = testInput($_POST["pname"]);
      // check if name only contains letters and whitespace
      if (!preg_match("/^[a-zA-Z ]*$/",$pname)) {
        $pnameErr = "Only letters and white space allowed";
@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    if (empty($_POST["url"])) {
      $urlErr = "Project Image URL is required";
    } else {
-     $url = test_input($_POST["url"]);
+     $url = testInput($_POST["url"]);
      // check if URL address syntax is valid (this regular expression also allows dashes in the URL)
      if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$url)) {
        $urlErr = "Invalid URL";
@@ -36,13 +36,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    if (empty($_POST["descr"])) {
      $descrErr = "Project description is required";
    } else {
-     $descr = test_input($_POST["descr"]);
+     $descr = testInput($_POST["descr"]);
    }
 
    if (empty($_POST["goal"])) {
      $goalErr = "Funding goal is required";
    } else {
-     $goal = test_input($_POST["goal"]);
+     $goal = testInput($_POST["goal"]);
      // check for number / decimal entries only
      if (!preg_match("/^\d*\.?\d*$/",$goal)) {
        $goalErr = "Invalid entry - please enter a numerical or decimal value";
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    if (empty($_POST["deadline"])) {
      $deadlineErr = "Project deadline is required";
    } else {
-     $deadline = test_input($_POST["deadline"]);
+     $deadline = testInput($_POST["deadline"]);
    }
 
    if (empty($_POST["community"])) {
@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    }
 }
 
-function test_input($data) {
+function testInput($data) {
    $data = trim($data);
    $data = stripslashes($data);
    $data = htmlspecialchars($data);
@@ -92,6 +92,13 @@ function test_input($data) {
      <option value="community1">Community 1</option>
      <option value="community2">Community 2</option>
      <option value="community3">Community 3</option>
+   </select>
+   <br><br>
+   Project Type:
+   <select name="product">
+     <option value="donation">Donation</option>
+     <option value="product">Product</option>
+     <option value="both">Both</option>
    </select>
    <span class="error">* <?php echo $communityErr;?></span>
    <br><br>

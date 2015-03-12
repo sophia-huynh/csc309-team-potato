@@ -32,15 +32,15 @@
 
 /*
 ===== COMMUNITY FUNCTIONS ===========================================
-    makeJoinButton($dbconn, $cid)
+    makeJoinButton($dbconn, $cid, $uid)
     
 */
     /*
-    Given a connection and cid, create a join button.
+    Given a connection, cid, and uid, create a join button.
     */
-    function makeJoinButton($dbconn, $cid){
+    function makeJoinButton($dbconn, $uid, $cid){
         // REPLACE index.php WITH THE COMMUNITY
-        echo "<a href ='index.php?cid=$cid'><div class='join'>Join Community</div></a>";
+        echo "<a href ='joincommunity.php?uid=$uid&cid=$cid'><div class='join'>Join Community</div></a>";
     }
 
 /*
@@ -193,6 +193,10 @@
                         <div class='projectdata'><h1>$name</h1>";
                         
         makePostTag($dbconn, $pid);
+        if ($ends >= 0){
+            // Add a 'fund' button
+            echo "<a href ='fund.php?pid=$pid'><div class='tag'>Fund it!</div></a>";
+        }
         
         echo "              <br/>Started by <b><a href='profile.php?uid=$uid'>$username</a></b>
                             <br/>Posted $startdate
@@ -203,6 +207,36 @@
                     </div>";
     }
 
+
+/*
+===== ADMIN PAGE FUNCTIONS ==========================================
+*/
+    function makeAdminPage($dbconn){
+        $result = pg_query($dbconn, "SELECT (SELECT count(*) FROM users), " .
+                                           "(SELECT count(*) FROM project), " . 
+                                           "(SELECT count(*) FROM community), " . 
+                                           "(SELECT avg(count) FROM (SELECT count(cid) FROM usercommunity GROUP BY uid) as c)");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        // Parse results from query
+        $row = pg_fetch_row($result);
+        // number of users
+        $numusers = $row[0];
+        // number of projects
+        $numprojects = $row[1];
+        // number of communities
+        $numcommunities = $row[2];
+        // average number of communities per user
+        $numcomuser = $row[3];
+
+        echo "Number of Users: $numusers<br/>
+              Number of Projects: $numprojects<br/>
+              Number of Communities: $numcommunities<br/>
+              Average number of Communities per User: $numcomuser<br/>";
+        
+    }
 
 /*
 ===== MULTI-USE FUNCTIONS ===========================================
@@ -286,7 +320,7 @@
             $username = $row[3];
             $image = "<img src=".$row[4].">";
             echo "<div class='review'>
-                      <div class='outer'><div class='image'>$image</div></div>
+                      <a href='profile.php?uid=$uid'><div class='outer'><div class='image'>$image</div></div></a>
                       <h4><a href='profile.php?uid=$uid'>$username</a></h4>
                       <h5>Rating: $rating</h5>
                       $review
@@ -357,6 +391,13 @@
     testInput($data)
     tryLogin($dbconn, $email, $pass)
     registerUser($dbconn, $name, $email, $pass)
+    createProject($dbconn, $pname, $url, $descr, $goal, $deadline, $community, $type, $uid)
+    createCommunity($dbconn, $cname, $uid)
+    updateProfile($dbconn, $uid, $url, $descr)
+    joinCommunity($dbconn, $uid, $cid)
+    createReview($dbconn, $uid, $pid, $rating, $review)
+    createUserReview($dbconn, $uid, $reviewer, $rating, $review)
+    fundProject($dbconn, $uid, $pid)
 */
     /*
     test_input($data)
@@ -366,6 +407,7 @@
        $data = trim($data);
        $data = stripslashes($data);
        $data = htmlspecialchars($data);
+       $data = str_replace("'", "''", $data);
        return $data;
     }
 
@@ -431,6 +473,175 @@
         $insertProfile = pg_query($dbconn, "INSERT INTO userprofile VALUES ($uid, '')");
 
         return "Success! Hello user $uid!";
+    }
+    
+    /*
+    createProject($dbconn, $pname, $url, $descr, $goal, $deadline, $community, $type, $uid)
+        Given valid information, inserts a project into the database and/or returns an
+        appropriate error message.
+    */
+    function createProject($dbconn, $pname, $url, $descr, $goal, $deadline, $community, $type, $uid){
+        // Fill in the query for the donation and product fields.  This will change after we sanitize queries.
+        if ($type == "donation"){
+            $donation = 'true, false';
+        }
+         else if ($type == "product"){
+            $donation = 'false, true';
+        }
+         else{
+            $donation = 'true, true';
+        }
+
+        // Check if the name already exists as a project
+        $testProject = pg_query($dbconn, "SELECT * FROM project WHERE name = '$pname'");
+        if (!$testProject){
+            echo "An error occurred.\n";
+            exit;
+        }
+
+        $projectRow = pg_fetch_row($testProject);
+        if ($projectRow){
+            return "Project already exists.";
+        }
+
+        // Find the start and end time for the project (relative to current time)
+        $time = time();
+        $start = date('Y-m-d H:i:s', $time);
+        $end = date('Y-m-d H:i:s', ($time + $deadline * (60*60*24)));
+
+        // Insert the project
+        $insertProject = pg_query($dbconn, "INSERT INTO project(name, image, description, goal, startdate, enddate, donation, product) " .
+                                           "VALUES ('$pname', '$url', '$descr', $goal, '$start', '$end', $donation)");
+
+        // get the pid of the recently inserted project
+        $getPid = pg_query($dbconn, "SELECT pid FROM project WHERE name = '$pname'");
+        if (!$getPid){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $pidRow = pg_fetch_row($getPid);
+        $pid = $pidRow[0];
+
+        // insert into initiator and projectcommunity
+        $insertInitiator = pg_query($dbconn, "INSERT INTO initiator VALUES ($uid, $pid)");
+        $insertCommunity= pg_query($dbconn, "INSERT INTO projectcommunity VALUES ($community, $pid)");
+        return "Success! pid is $pid.";
+    }
+
+    /*
+    listFormCommunities($dbconn)
+        Given a connection, print the options for each community.
+        -- In phase IV, change this to list communities of which a user is part of.
+    */
+    function listFormCommunities($dbconn){
+        $testCommunity = pg_query($dbconn, "SELECT cid, name FROM community");
+        if (!$testCommunity){
+            echo "An error occurred.\n";
+            exit;
+        }
+        
+        while ($row = pg_fetch_row($testCommunity)) {
+            $cid = $row[0];
+            $name = $row[1];
+            echo "<option value='$cid'>$name</option>";
+        }
+    }
+
+    /*
+    createCommunity($dbconn, $cname, $uid)
+        Given a community name and user, creates the corresponding community and return an
+        appropriate error message.
+    */
+    function createCommunity($dbconn, $cname, $uid){
+        $testCommunity = pg_query($dbconn, "SELECT * FROM community WHERE name = '$cname'");
+        if (!$testCommunity){
+            echo "An error occurred.\n";
+            exit;
+        }
+
+        $communityRow = pg_fetch_row($testCommunity);
+        if ($communityRow){
+            return "Community already exists.";
+        }
+
+        // Insert the community
+        $insertCommunity = pg_query($dbconn, "INSERT INTO community(name) VALUES ('$cname')");
+
+        // get the pid of the recently inserted project
+        $getCid = pg_query($dbconn, "SELECT cid FROM community WHERE name = '$cname'");
+        if (!$getCid){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $cidRow = pg_fetch_row($getCid);
+        $cid = $cidRow[0];
+
+        // insert user into community
+        $insertUser = pg_query($dbconn, "INSERT INTO usercommunity(cid, uid) VALUES ($cid, $uid)");
+        return "Success! cid is $cid.";
+    }
+
+    /*
+    updateProfile($dbconn, $uid, $url, $descr)
+        Given a username and profile information, update the profile for that user.
+    */
+    function updateProfile($dbconn, $uid, $url, $descr){
+        // Update description
+        $updateProfile = pg_query($dbconn, "UPDATE userprofile SET description='$descr' WHERE uid=$uid");
+
+        // Update image
+        $updateProfile = pg_query($dbconn, "UPDATE userposts SET image='$url' WHERE uid=$uid");
+
+        return "Success! $uid's profile update!";
+    }
+
+    /*
+    joinCommunity($dbconn, $uid, $cid)
+        Adds a user to a community and returns an appropriate message.
+    */
+    function joinCommunity($dbconn, $uid, $cid){
+        $testCommunity = pg_query($dbconn, "SELECT * FROM usercommunity WHERE uid = $uid AND cid = $cid");
+        if (!$testCommunity){
+            echo "An error occurred.\n";
+            exit;
+        }
+
+        $communityRow = pg_fetch_row($testCommunity);
+        if ($communityRow){
+            return "User is already part of this community.";
+        }
+
+        // Insert the community
+        $insertCommunity = pg_query($dbconn, "INSERT INTO usercommunity(uid, cid) VALUES ($uid, $cid)");
+        return "Success!";
+    }
+
+    /*
+    createProjectReview($dbconn, $uid, $pid, $rating, $review)
+        Add a project review to the database.
+    */
+    function createProjectReview($dbconn, $uid, $pid, $rating, $review){
+        $insertReview = pg_query($dbconn, "INSERT INTO projectreview(pid, reviewer, rating, review) VALUES ($pid, $uid, $rating, '$review')");
+        return "Success!";
+    }
+
+    
+    /*
+    createUserReview($dbconn, $uid, $reviewer, $rating, $review)
+        Add a user review to the database.
+    */
+    function createUserReview($dbconn, $uid, $reviewer, $rating, $review){
+        $insertReview = pg_query($dbconn, "INSERT INTO userreview(uid, reviewer, rating, review) VALUES ($uid, $reviewer, $rating, '$review')");
+        return "Success!";
+    }
+
+    /*
+    fundProject($dbconn, $uid, $pid, $amount)
+        Add a funder and their amount to the database.
+    */
+    function fundProject($dbconn, $uid, $pid, $amount){
+        $insertFunding = pg_query($dbconn, "INSERT INTO funder(uid, pid, amount) VALUES ($uid, $pid, $amount)");
+        return "Success!";
     }
 ?>
 

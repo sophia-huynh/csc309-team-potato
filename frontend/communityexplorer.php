@@ -1,6 +1,5 @@
 <?php
-    include 'db.php';
-    include 'functions.php';
+    include 'imports/imports.php'
 ?>
 <html>
     <head>
@@ -21,6 +20,12 @@
                 header("Location: communities.php");
                 die();
             }
+            if (isset($_GET['uid'])){
+               $uid = $_GET['uid'];
+           }
+           else{
+             $uid = 2;
+           }
 
             $community = pg_query($dbconn, "SELECT name FROM community " .
                             "WHERE cid = $cid");
@@ -33,7 +38,7 @@
 
             // Create the header tag and join button for the community
             makeTag($cid, $name);
-            makeJoinButton($dbconn, $cid);
+            makeJoinButton($dbconn, $uid, $cid);
             
             // Get the community's project pages
             $result = pg_query($dbconn, "SELECT pid FROM projectcommunity " .

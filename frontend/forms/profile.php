@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    if (empty($_POST["descr"])) {
      $descrErr = "Project description is required";
    } else {
-     $descr = test_input($_POST["descr"]);
+     $descr = testInput($_POST["descr"]);
    }
 
 }
