@@ -28,6 +28,10 @@
                 echo "<h3>Communities</h3>";
                 displayCommunities($dbconn, $uid);
 
+                // Friends
+                echo "<h3>Friends</h3>";
+                displayFriends($dbconn, $uid);
+
                 // Reputation
                 // Get the average of reviews
                 $average = getAverage($dbconn, $uid, "User");

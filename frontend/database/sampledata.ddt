@@ -1,8 +1,8 @@
 INSERT INTO Users(email, password) VALUES ('sputnik@bob.com', 'abcdef');
 INSERT INTO Users(email, password) VALUES ('apple@live.com', 'abcdef');
 
-INSERT INTO UserPosts VALUES (1, 'Potato', 'http://puu.sh/guUKt/7e706123c1.png');
-INSERT INTO UserPosts VALUES (2, 'Apple', 'http://puu.sh/guUN4/e8a39af322.png');
+INSERT INTO UserPosts VALUES (1, 'Potato', 'http://puu.sh/gwQN9/4f211d9650.png');
+INSERT INTO UserPosts VALUES (2, 'Apple', 'http://puu.sh/gwVr0/7fa494b14d.png');
 
 INSERT INTO UserProfile VALUES (1, 'Potatos blog is here hooray!!!!');
 INSERT INTO UserProfile VALUES (2, 'Apple has a lot to say but she doesnt have the room to say it which is unfortunate so oh well!!! S> ILBIS 50M @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
@@ -34,5 +34,4 @@ INSERT INTO ProjectCommunity VALUES (1, 1);
 INSERT INTO ProjectCommunity VALUES (2, 2);
 INSERT INTO ProjectCommunity VALUES (3, 3);
 
-INSERT INTO Friend VALUES (1, 2);
 INSERT INTO Admins VALUES (1);

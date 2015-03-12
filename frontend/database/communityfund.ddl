@@ -81,10 +81,7 @@ create table projectcommunity(
         pid integer REFERENCES Project(pid)
 );
 
-create table friend(
-        uid integer REFERENCES Users(uid),
-        friend integer REFERENCES Users(uid)
-);
+create view friend as select u1.uid as uid, u2.uid as friend from usercommunity u1 join usercommunity u2 on u1.cid = u2.cid where u1.uid < u2.uid;
 
 create table admins(
         uid integer REFERENCES Users(uid)

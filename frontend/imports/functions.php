@@ -149,6 +149,41 @@
         echo "</div>";
     }
 
+    /*
+    displayCommunities($dbconn, $uid)
+        Given a connection and uid, generates all friends of the user.
+    */
+    function displayFriends($dbconn, $uid){
+        $friends = pg_query($dbconn, "SELECT * FROM friend WHERE uid = $uid OR friend = $uid");
+        if (!$friends){
+            echo "An error occurred.\n";
+            exit;
+        }
+        echo "<div class='usercontainer'>";
+        while ($row = pg_fetch_row($friends)) {
+            if ($row[0] == $uid)
+                $friend = $row[1];
+            else
+                $friend = $row[0];
+            generateFriend($dbconn, $friend);
+        }
+        echo "</div>";
+    }
+
+    function generateFriend($dbconn, $uid){
+    
+        $result = pg_query($dbconn, "SELECT username, image FROM userposts WHERE uid = $uid");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        while ($row = pg_fetch_row($result)) {
+            $username = $row[0];
+            $image = "<img src=".$row[1].">";
+            echo "<a href='profile.php?uid=$uid'><div class='outer'><div class='image'>$image</div></div></a>";
+        }
+    }
+
 /*
 ===== PROJECT PAGE FUNCTIONS ========================================
     makeProjectPost($dbconn, $pid)
