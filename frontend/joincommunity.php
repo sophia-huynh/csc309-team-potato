@@ -1,18 +1,18 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     // define variables and set to empty values
-    if (isset($_GET['uid'])){
-        $uid = $_GET['uid'];
-    }else{
-        $uid = 2;
-    }
     
     if (isset($_GET['cid'])){
         $cid = $_GET['cid'];
-    }else{
-        $cid = 1;
     }
-    $error = joinCommunity($dbconn, $uid, $cid);
+    $error = joinCommunity($dbconn, $login, $cid);
 ?>
 <html>
     <head>
@@ -25,7 +25,7 @@
         ?>
 
         <?php
-            echo "Uid $uid joined community $cid with error $error";
+            header("Location: communityexplorer.php?cid=$cid")
         ?>
         
         <?

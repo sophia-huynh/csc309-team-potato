@@ -1,5 +1,10 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
 ?>
 <html>
     <head>
@@ -13,7 +18,7 @@
         
         <?php
             $pid = $_GET['pid'];
-            makeProjectPost($dbconn, $pid);
+            makeProjectPost($dbconn, $pid, $login);
             
             // Get the average of reviews
             $average = getAverage($dbconn, $pid, "Project");
@@ -21,7 +26,8 @@
                   <h4>Average: $average</h4>";
 
             // Gather reviews
-            echo "<center><a href ='makeprojectreview.php?pid=$pid'><div class='tag'>Write a Review</div></a></center>";
+            if (sameCommunityProject($dbconn, $login, $pid) && !initiator($dbconn, $login, $pid))
+                echo "<center><a href ='makeprojectreview.php?pid=$pid'><div class='tag'>Write a Review</div></a></center>";
             displayReviews($dbconn, $pid, "Project");
         ?>
         

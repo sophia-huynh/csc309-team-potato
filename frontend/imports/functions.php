@@ -6,15 +6,17 @@
 */
     
     /*
-    Given a cid and name, creates a tag.
+    makeTag($cid, $name)
+        Given a cid and name, creates a tag.
     */
     function makeTag($cid, $name){
         echo "<a href ='communityexplorer.php?cid=$cid'><div class='tag'>$name</div></a>";
     }
 
     /*
-    Given a connection and pid, gets the community for which the project belongs
-    and creates the tag.
+    makePostTag($dbconn, $pid)
+        Given a connection and pid, gets the community for which the project belongs
+        and creates the tag.
     */
     function makePostTag($dbconn, $pid){
         $result = pg_query($dbconn, "SELECT name, cid FROM community " .
@@ -33,14 +35,76 @@
 /*
 ===== COMMUNITY FUNCTIONS ===========================================
     makeJoinButton($dbconn, $cid, $uid)
+    makeLeaveButton($dbconn, $uid, $cid)
+    inCommunity($dbconn, $uid, $cid)
+    sameCommunity($dbconn, $uid, $other)
+    sameCommunityProject($dbconn, $uid, $pid)
     
 */
     /*
-    Given a connection, cid, and uid, create a join button.
+    makeJoinButton($dbconn, $cid, $uid)
+        Given a connection, uid, and cid, create a join button.
     */
     function makeJoinButton($dbconn, $uid, $cid){
-        // REPLACE index.php WITH THE COMMUNITY
         echo "<a href ='joincommunity.php?uid=$uid&cid=$cid'><div class='join'>Join Community</div></a>";
+    }
+    
+    /*
+    makeLeaveButton($dbconn, $cid, $uid)
+        Given a connection, uid, and cid, create a leave button.
+    */
+    function makeLeaveButton($dbconn, $uid, $cid){
+        echo "<a href ='leavecommunity.php?uid=$uid&cid=$cid'><div class='join'>Leave Community</div></a>";
+    }
+    
+    /*
+    inCommunity($dbconn, $uid, $cid)
+        Given a connection, uid, and cid, checks if the user is in that community.
+    */
+    function inCommunity($dbconn, $uid, $cid){
+        $result = pg_query($dbconn, "SELECT uid FROM usercommunity WHERE uid=$uid AND cid=$cid");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if ($row = pg_fetch_row($result)){
+            return 1;
+        }
+        return 0;
+    }
+
+    /*
+    sameCommunity($dbconn, $uid, $other)
+        Given two uids, determines if they share at least one community in common.
+    */
+    function sameCommunity($dbconn, $uid, $other){
+        $result = pg_query($dbconn, "SELECT * FROM usercommunity AS u1 JOIN usercommunity AS u2 ON u1.cid = u2.cid WHERE u1.uid = $uid AND u2.uid = $other");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if ($row = pg_fetch_row($result)){
+            return 1;
+        }
+        return 0;
+        
+    }
+
+    /*
+    sameCommunityProject($dbconn, $uid, $pid)
+        Given a uid and pid, determines if the user and project are in the same
+        community.
+    */
+    function sameCommunityProject($dbconn, $uid, $pid){
+        $community = pg_query($dbconn, "SELECT cid FROM projectcommunity WHERE pid = $pid");
+        
+        if (!$community){
+            echo "An error occurred.\n";
+            exit;
+        }
+        $cid = pg_fetch_row($community)[0];
+        return inCommunity($dbconn, $uid, $cid);
+        
     }
 
 /*
@@ -82,7 +146,7 @@
         Given a connection and uid, generates the corresponding projects funded.
     */
     function displayFunded($dbconn, $uid){
-        $fundedprojects = pg_query($dbconn, "SELECT pid, name, image ".
+        $fundedprojects = pg_query($dbconn, "SELECT DISTINCT pid, name, image ".
                                             "FROM funder NATURAL JOIN project ".
                                             "WHERE uid = $uid");
         if (!$fundedprojects){
@@ -160,18 +224,32 @@
             exit;
         }
         echo "<div class='usercontainer'>";
+        $friendslist = [];
         while ($row = pg_fetch_row($friends)) {
             if ($row[0] == $uid)
                 $friend = $row[1];
             else
                 $friend = $row[0];
-            generateFriend($dbconn, $friend);
+                
+            $posted = 0;
+            foreach ($friendslist as $friended){
+                if ($friended == $friend)
+                    $posted = 1;
+            }
+            if (!$posted){
+                $friendslist[] = $friend;
+                generateFriend($dbconn, $friend);
+            }
         }
         echo "</div>";
     }
 
+
+    /*
+    generateFriend($dbconn, $uid)
+        Given a connection and uid, generates the post for icon for the friend.
+    */
     function generateFriend($dbconn, $uid){
-    
         $result = pg_query($dbconn, "SELECT username, image FROM userposts WHERE uid = $uid");
         if (!$result){
             echo "An error occurred.\n";
@@ -186,13 +264,15 @@
 
 /*
 ===== PROJECT PAGE FUNCTIONS ========================================
-    makeProjectPost($dbconn, $pid)
+    makeProjectPost($dbconn, $pid, uid)
+    hasBoth($dbconn, $pid)
+    initiator($dbconn, $uid, $pid)
 */
     /*
-    makeProjectPost($dbconn, $pid)
+    makeProjectPost($dbconn, $pid, uid)
         Given a connection and pid, generates the corresponding project page.
     */
-    function makeProjectPost($dbconn, $pid){
+    function makeProjectPost($dbconn, $pid, $login){
         $project = pg_query($dbconn, "SELECT name, image, description, goal, ".
                                   "startdate, enddate, product, donation ".
                                   "FROM project WHERE pid = $pid");
@@ -206,10 +286,18 @@
         $description = $row[2];
         $goal = $row[3];
         $startdate = $row[4];
+        $startdate = formatDate($startdate);
         $enddate = $row[5];
         $product = $row[6];
         $donation = $row[7];
         $ends = timeUntilEnd($enddate);
+        $enddate = formatDate($enddate);
+        $funded = getFunded($dbconn, $pid);
+        if ($ends < 0){
+            $endsin = "Ended on $enddate";
+        }else{
+            $endsin = "Ends in $ends Days ($enddate)";
+        }
 
         // Get the initiator of the project
         $initiator = pg_query($dbconn, "SELECT uid, username ".
@@ -222,35 +310,73 @@
         $row = pg_fetch_row($initiator);
         $uid = $row[0];
         $username = $row[1];
-        
         echo "<div class='project'>
                         <div class='postimage'><center><img src=$image></center></div>
                         <div class='projectdata'><h1>$name</h1>";
                         
         makePostTag($dbconn, $pid);
-        if ($ends >= 0){
+        if ($ends >= 0 && sameCommunityProject($dbconn, $login, $pid)){
             // Add a 'fund' button
             echo "<a href ='fund.php?pid=$pid'><div class='tag'>Fund it!</div></a>";
         }
         
         echo "              <br/>Started by <b><a href='profile.php?uid=$uid'>$username</a></b>
                             <br/>Posted $startdate
-                            <br/>Ends in $ends Days ($enddate)
-                            <br/><br/>
+                            <br/>$endsin
+                            <br/>$funded out of $goal Funded<br/><br/>
                             </div>
                         <p>$description</p>
                     </div>";
     }
 
+    /*
+    hasBoth($dbconn, $pid)
+        Given a pid, checks if a prroject accepts both donations and purchases.
+    */
+    function hasBoth($dbconn, $pid){
+        $result = pg_query($dbconn, "SELECT * FROM project WHERE pid=$pid AND product=true AND donation=true");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if ($row = pg_fetch_row($result)){
+            return 1;
+        }
+        return 0;
+    }
+    
+    /*
+    initiator($dbconn, $uid, $pid)
+        Given a uid and pid, checks if the user is the project's initiator.
+    */
+    function initiator($dbconn, $uid, $pid){
+        $initiatedprojects = pg_query($dbconn, "SELECT * ".
+                                               "FROM initiator WHERE uid = $uid AND pid = $pid");
+        if (!$initiatedprojects){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if ($row = pg_fetch_row($initiatedprojects)) {
+            return 1;
+        }
+        return 0;
+    }
 
 /*
 ===== ADMIN PAGE FUNCTIONS ==========================================
+    makeAdminPage($dbconn)
 */
+    /*
+    makeAdminPage($dbconn)
+        Given a connection, generates the statistics for the administrator's page.
+    */
     function makeAdminPage($dbconn){
         $result = pg_query($dbconn, "SELECT (SELECT count(*) FROM users), " .
                                            "(SELECT count(*) FROM project), " . 
                                            "(SELECT count(*) FROM community), " . 
-                                           "(SELECT avg(count) FROM (SELECT count(cid) FROM usercommunity GROUP BY uid) as c)");
+                                           "(SELECT avg(count) FROM (SELECT count(cid) FROM usercommunity GROUP BY uid) as c), ".
+                                           "(SELECT count(*) FROM funded), ".
+                                           "(SELECT (avg(date-startdate)) FROM project NATURAL JOIN funded)");
         if (!$result){
             echo "An error occurred.\n";
             exit;
@@ -265,23 +391,52 @@
         $numcommunities = $row[2];
         // average number of communities per user
         $numcomuser = $row[3];
-
+        // Number of projects funded
+        $fundedprojects = $row[4];
+        // Average days to reach a fund goal
+        $avgtogoal = $row[5];
+        
         echo "Number of Users: $numusers<br/>
               Number of Projects: $numprojects<br/>
               Number of Communities: $numcommunities<br/>
-              Average number of Communities per User: $numcomuser<br/>";
-        
+              Average number of Communities per User: $numcomuser<br/>
+              Number of Funded Projects: $fundedprojects<br/>
+              Average Time to Goal: $avgtogoal";
+    }
+
+    /*
+    isAdmin($dbconn, $uid)
+        Given a UID, checks if that user is an admin or not.
+    */
+    function isAdmin($dbconn, $uid){
+        $result = pg_query($dbconn, "SELECT uid FROM admins WHERE uid=$uid");
+        if (!$result){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if ($row = pg_fetch_row($result)){
+            return 1;
+        }
+        return 0;
     }
 
 /*
 ===== MULTI-USE FUNCTIONS ===========================================
+    formatDate($date)
     makePost($dbconn, $pid, $type)
     displayReviews($dbconn, $pid/$uid, $type)
     getFunded($dbconn, $pid)
     getAverage($dbconn, $pid/$uid, $type)
     timeUntilEnd($enddate)
+    getUsername($dbconn, $uid)
 */
-
+ /*
+    formatDate($date)
+        Given a date, returns it in Month day, Year, Time format.
+    */
+    function formatDate($date){
+        return date("F j, Y, g:i a", strtotime($date));
+    }
     /*
     makePost($dbconn, $pid, $type)
         Given a connection, pid and type, creates the dashboard/community explorer 
@@ -319,9 +474,15 @@
         if ($type != "Community"){
             makePostTag($dbconn, $pid);
         }
+
+        if ($daysLeft < 0){
+            $daysleftmessage = "Ended";
+        }else{
+            $daysleftmessage = "$daysLeft Days Left";
+        }
         
         echo "    <div class='fundedamount'>$funded Funded</div>
-                  <div class='daysleft'>$daysLeft Days Left</div>
+                  <div class='daysleft'>$daysleftmessage</div>
               </div>";
     }
     
@@ -421,6 +582,34 @@
     function timeUntilEnd($enddate){
         return floor((strtotime($enddate) - time()) / (60*60*24));
     }
+
+    
+    /*
+    getUsername($dbconn, $uid)
+        Given a uid, returns the corresponding username.
+    */
+    function getUsername($dbconn, $uid){
+        $usernames = pg_query($dbconn, "SELECT username FROM userposts WHERE uid = $uid");
+        if (!$usernames){
+            echo "An error occurred.\n";
+            exit;
+        }
+        return pg_fetch_row($usernames)[0];
+    }
+
+    
+    /*
+    getProjectName($dbconn, $uid)
+        Given a pid, returns the corresponding project name.
+    */
+    function getProjectName($dbconn, $pid){
+        $name = pg_query($dbconn, "SELECT name FROM project WHERE pid = $pid");
+        if (!$name){
+            echo "An error occurred.\n";
+            exit;
+        }
+        return pg_fetch_row($name)[0];
+    }
 /*
 ===== FORM FUNCTIONS ===============================================
     testInput($data)
@@ -451,22 +640,26 @@
         Given a connection, test if the login and return an appropriate message.
     */
     function tryLogin($dbconn, $email, $pass) {
-       $result = pg_query($dbconn, "SELECT uid, password FROM users WHERE email = '$email'");
+       $result = pg_query($dbconn, "SELECT uid, password FROM users WHERE lower(email) = lower('$email')");
         if (!$result){
             echo "An error occurred.\n";
             exit;
         }
+        $error = 0;
         $row = pg_fetch_row($result);
         if (!$row){
-            return "No such email found.";
+            $error -= 1;
         }
         $uid = $row[0];
         $password = $row[1];
         if ($password != $pass){
-            return "Invalid password.";
+            $error -= 2;
         }
 
-        return "Success! Hello user $uid!";
+        if ($error < 0)
+            $uid = $error;
+
+        return $uid;
     }
     
     /*
@@ -475,39 +668,43 @@
         appropriate error message.
     */
     function registerUser($dbconn, $name, $email, $pass){
-        $testEmail = pg_query($dbconn, "SELECT * FROM users WHERE email = '$email'");
+    
+        $testEmail = pg_query($dbconn, "SELECT * FROM users WHERE lower(email) = lower('$email')");
+        $uid = 0;
         if (!$testEmail){
             echo "An error occurred.\n";
             exit;
         }
         $emailRow = pg_fetch_row($testEmail);
         if ($emailRow){
-            return "Email already exists.";
+            $uid -= 1;
         }
         
-        $testName = pg_query($dbconn, "SELECT * FROM userposts WHERE username = '$name'");
+        $testName = pg_query($dbconn, "SELECT * FROM userposts WHERE lower(username) = lower('$name')");
         if (!$testName){
             echo "An error occurred.\n";
             exit;
         }
         $nameRow = pg_fetch_row($testName);
         if ($nameRow){
-            return "Username already exists.";
+            $uid -= 2;
         }
 
-        $insertUser = pg_query($dbconn, "INSERT INTO users(email, password) VALUES ('$email', '$pass')");
-        $getUid = pg_query($dbconn, "SELECT uid FROM users WHERE email = '$email'");
-        if (!$getUid){
-            echo "An error occurred.\n";
-            exit;
+        if ($uid == 0){
+            $insertUser = pg_query($dbconn, "INSERT INTO users(email, password) VALUES ('$email', '$pass')");
+            $getUid = pg_query($dbconn, "SELECT uid FROM users WHERE email = '$email'");
+            if (!$getUid){
+                echo "An error occurred.\n";
+                exit;
+            }
+            $uidRow = pg_fetch_row($getUid);
+            $uid = $uidRow[0];
+            
+            $insertPosts = pg_query($dbconn, "INSERT INTO userposts VALUES ($uid, '$name', '')");
+            $insertProfile = pg_query($dbconn, "INSERT INTO userprofile VALUES ($uid, '')");
         }
-        $uidRow = pg_fetch_row($getUid);
-        $uid = $uidRow[0];
         
-        $insertPosts = pg_query($dbconn, "INSERT INTO userposts VALUES ($uid, '$name', '')");
-        $insertProfile = pg_query($dbconn, "INSERT INTO userprofile VALUES ($uid, '')");
-
-        return "Success! Hello user $uid!";
+        return $uid;
     }
     
     /*
@@ -528,7 +725,7 @@
         }
 
         // Check if the name already exists as a project
-        $testProject = pg_query($dbconn, "SELECT * FROM project WHERE name = '$pname'");
+        $testProject = pg_query($dbconn, "SELECT * FROM project WHERE lower(name) = lower('$pname')");
         if (!$testProject){
             echo "An error occurred.\n";
             exit;
@@ -536,7 +733,7 @@
 
         $projectRow = pg_fetch_row($testProject);
         if ($projectRow){
-            return "Project already exists.";
+            return -2;
         }
 
         // Find the start and end time for the project (relative to current time)
@@ -560,16 +757,15 @@
         // insert into initiator and projectcommunity
         $insertInitiator = pg_query($dbconn, "INSERT INTO initiator VALUES ($uid, $pid)");
         $insertCommunity= pg_query($dbconn, "INSERT INTO projectcommunity VALUES ($community, $pid)");
-        return "Success! pid is $pid.";
+        return $pid;
     }
 
     /*
-    listFormCommunities($dbconn)
+    listFormCommunities($dbconn, $uid)
         Given a connection, print the options for each community.
-        -- In phase IV, change this to list communities of which a user is part of.
     */
-    function listFormCommunities($dbconn){
-        $testCommunity = pg_query($dbconn, "SELECT cid, name FROM community");
+    function listFormCommunities($dbconn, $uid){
+        $testCommunity = pg_query($dbconn, "SELECT cid, name FROM community NATURAL JOIN usercommunity WHERE uid = $uid");
         if (!$testCommunity){
             echo "An error occurred.\n";
             exit;
@@ -588,7 +784,7 @@
         appropriate error message.
     */
     function createCommunity($dbconn, $cname, $uid){
-        $testCommunity = pg_query($dbconn, "SELECT * FROM community WHERE name = '$cname'");
+        $testCommunity = pg_query($dbconn, "SELECT * FROM community WHERE lower(name) = lower('$cname')");
         if (!$testCommunity){
             echo "An error occurred.\n";
             exit;
@@ -596,7 +792,7 @@
 
         $communityRow = pg_fetch_row($testCommunity);
         if ($communityRow){
-            return "Community already exists.";
+            return -1;
         }
 
         // Insert the community
@@ -613,7 +809,7 @@
 
         // insert user into community
         $insertUser = pg_query($dbconn, "INSERT INTO usercommunity(cid, uid) VALUES ($cid, $uid)");
-        return "Success! cid is $cid.";
+        return $cid;
     }
 
     /*
@@ -643,12 +839,26 @@
 
         $communityRow = pg_fetch_row($testCommunity);
         if ($communityRow){
-            return "User is already part of this community.";
+            return 0;
         }
 
         // Insert the community
         $insertCommunity = pg_query($dbconn, "INSERT INTO usercommunity(uid, cid) VALUES ($uid, $cid)");
-        return "Success!";
+        return 1;
+    }
+
+    /*
+    leaveCommunity($dbconn, $uid, $cid)
+        Removes a user from a community and returns an appropriate message.
+    */
+    function leaveCommunity($dbconn, $uid, $cid){
+        $testCommunity = pg_query($dbconn, "DELETE FROM usercommunity WHERE uid = $uid AND cid = $cid");
+        if (!$testCommunity){
+            echo "An error occurred.\n";
+            exit;
+        }
+
+        return 1;
     }
 
     /*
@@ -674,9 +884,72 @@
     fundProject($dbconn, $uid, $pid, $amount)
         Add a funder and their amount to the database.
     */
-    function fundProject($dbconn, $uid, $pid, $amount){
-        $insertFunding = pg_query($dbconn, "INSERT INTO funder(uid, pid, amount) VALUES ($uid, $pid, $amount)");
-        return "Success!";
+    function fundProject($dbconn, $uid, $pid, $amount, $type){
+        if (hasBoth($dbconn, $pid)){
+            if ($type == "1"){
+                $bought = "true";
+            }
+            else{
+                $bought = "false";
+            }
+        }else{
+            $result = pg_query($dbconn, "SELECT * FROM project WHERE pid=$pid AND product=true");
+            if (!$result){
+                echo "An error occurred.\n";
+                exit;
+            }
+            if ($row = pg_fetch_row($result)){
+                $bought = "true";
+            }else{
+                $bought = "false";
+            }
+        }
+        $insertFunding = pg_query($dbconn, "INSERT INTO funder(uid, pid, amount, bought) VALUES ($uid, $pid, $amount, $bought)");
+        if (!$insertFunding){
+            echo "An error occurred.\n";
+            exit;
+        }
+        if (justFunded($dbconn, $pid)){
+            $time = time();
+            $date = date('Y-m-d H:i:s', $time);
+            $insertFunded = pg_query($dbconn, "INSERT INTO funded(pid, date) VALUES ($pid, '$date')");
+            if (!$insertFunded){
+                echo "An error occurred.\n";
+                exit;
+            }
+        }
+        return $pid;
+    }
+
+    /*
+    justFunded($dbconn, $pid)
+
+        Checks if a project has just been funded or not. If it has, then update
+        the database. If not, don't do anything.
+    */
+    function justFunded($dbconn, $pid){
+        $alreadyFunded = pg_query($dbconn, "SELECT * FROM funded WHERE pid = $pid");
+        if (!$alreadyFunded){
+            echo "An error occurred.\n";
+            exit;
+        }
+        // The project was already funded
+        if ($row = pg_fetch_row($alreadyFunded))
+            return 0;
+
+        $project = pg_query($dbconn, "SELECT goal FROM project WHERE pid = $pid");
+        if (!$project){
+            echo "An error occurred.\n";
+            exit;
+        }
+        
+        $row = pg_fetch_row($project);
+        $goal = $row[0];
+
+        if (getFunded($dbconn, $pid) >= $goal)
+            return 1;
+            
+        return 0;
     }
 ?>
 

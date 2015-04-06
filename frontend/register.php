@@ -1,5 +1,12 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     
     // define variables and set to empty values
     $nameErr = $emailErr = $passErr = "";

@@ -1,5 +1,10 @@
 <?php
-    include 'imports/imports.php'
+    include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
 ?>
 <html>
     <head>
@@ -20,12 +25,6 @@
                 header("Location: communities.php");
                 die();
             }
-            if (isset($_GET['uid'])){
-               $uid = $_GET['uid'];
-           }
-           else{
-             $uid = 2;
-           }
 
             $community = pg_query($dbconn, "SELECT name FROM community " .
                             "WHERE cid = $cid");
@@ -38,7 +37,14 @@
 
             // Create the header tag and join button for the community
             makeTag($cid, $name);
-            makeJoinButton($dbconn, $uid, $cid);
+            
+            if ($login >= 0){
+                if (inCommunity($dbconn, $login, $cid)){
+                    makeLeaveButton($dbconn, $login, $cid);
+                }else{
+                    makeJoinButton($dbconn, $login, $cid);
+                }
+            }
             
             // Get the community's project pages
             $result = pg_query($dbconn, "SELECT pid FROM projectcommunity " .

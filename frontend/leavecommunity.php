@@ -6,6 +6,14 @@
     if (isset($_SESSION['uid']))
         $login = $_SESSION['uid'];
 ?>
+<?php
+    // define variables and set to empty values
+    
+    if (isset($_GET['cid'])){
+        $cid = $_GET['cid'];
+    }
+    $error = leaveCommunity($dbconn, $login, $cid);
+?>
 <html>
     <head>
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -15,9 +23,9 @@
         <?php
             include 'header.php';
         ?>
-        
+
         <?php
-            makeAdminPage($dbconn);
+            header("Location: communityexplorer.php?cid=$cid")
         ?>
         
         <?
@@ -25,7 +33,7 @@
         ?>
         
         <script>
-            document.getElementById("admin tab").className = "tab selected";
+            document.getElementById("communities tab").className = "tab selected";
         </script>
   </body>
 </html>

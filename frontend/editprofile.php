@@ -1,5 +1,14 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
+    if ($login < 0)
+        header("Location: index.php");
     // define variables and set to empty values
     $urlErr = $descrErr = "";
     $url = $descr = "";
@@ -26,8 +35,8 @@
        }
        
        if (!$error){
-           $uid = 2;
-           $descr = updateProfile($dbconn, $uid, $url, $descr);
+           $descr = updateProfile($dbconn, $login, $url, $descr);
+           header("Location: profile.php");
        }
     }
 ?>
@@ -43,25 +52,16 @@
 
         
         <h2>User Profile Page</h2>
-        <p><span class="error">* required field.</span></p>
+        <p><span class="errortext">* required field.</span></p>
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
            Image URL: <input type="text" name="url" value="<?php echo $url;?>">
-           <span class="error"><?php echo $urlErr;?></span>
-           <img src="<?php echo $url;?>" alt="imageurl" style="width:104px;height:142px">
+           <span class="errortext">* <?php echo $urlErr;?></span>
            <br><br>
-           Description: <textarea name="descr" rows="5" cols="40"><?php echo $descr;?></textarea>
-           <span class="error">* <?php echo $descrErr;?></span>
+           Description: <br><textarea name="descr" rows="5" cols="40"><?php echo $descr;?></textarea>
+           <span class="errortext">* <?php echo $descrErr;?></span>
            <br><br>
            <input type="submit" name="submit" value="Submit">
         </form>
-
-        <?php
-            echo "<h2>Your Input:</h2>";
-            echo $url;
-            echo "<br>";
-            echo $descr;
-        ?>
-        
         <?
             include 'footer.php';
         ?>

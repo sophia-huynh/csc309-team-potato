@@ -1,5 +1,12 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     // define variables and set to empty values
     $ratingErr = $reviewErr = "";
     $rating = $review = "";
@@ -9,7 +16,7 @@
         $pid = $_GET['pid'];
     }
     else{
-      $pid = 1;
+      header("Location: index.php");
     }
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
        if (!empty($_POST["rating"])) {
@@ -24,14 +31,8 @@
        }
        
        if (!$error){
-           // Add to database
-           if (isset($_GET['uid'])){
-               $uid = $_GET['uid'];
-           }
-           else{
-             $uid = 2;
-           }
-           $review = createProjectReview($dbconn, $uid, $pid, $rating, $review);
+           $review = createProjectReview($dbconn, $login, $pid, $rating, $review);
+           header("Location: project.php?pid=$pid");
        }
     }
 ?>
@@ -47,10 +48,10 @@
 
         
         <h2>Write a Review</h2>
-        <p><span class="error">* required field.</span></p>
+        <p><span class="errortext">* required field.</span></p>
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]), "?pid=$pid";?>">
            Review Description: <textarea name="review" rows="5" cols="40"><?php echo $review;?></textarea>
-           <span class="error">* <?php echo $reviewErr;?></span>
+           <span class="errortext">* <?php echo $reviewErr;?></span>
            <br><br>
            Rating:
            <select name="rating">
@@ -60,18 +61,11 @@
              <option value="4">4</option>
              <option value="5">5</option>
            </select>
-           <span class="error">* <?php echo $ratingErr;?></span>
+           <span class="errortext">* <?php echo $ratingErr;?></span>
            <br><br>
            <input type="submit" name="submit" value="Submit">
         </form>
 
-        <?php
-            echo "<h2>Your Input:</h2>";
-            echo $rating;
-            echo "<br>";
-            echo $review;
-        ?>
-        
         <?
             include 'footer.php';
         ?>

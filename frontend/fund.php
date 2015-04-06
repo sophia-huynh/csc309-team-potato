@@ -1,5 +1,12 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     // define variables and set to empty values
     $fundErr = "";
     $fund = "";
@@ -9,14 +16,10 @@
        $pid = $_GET['pid'];
     }
     else{
-     $pid = 2;
+       header("Location: index.php");
     }
-    if (isset($_GET['uid'])){
-       $uid = $_GET['uid'];
-    }
-    else{
-     $uid = 2;
-    }
+    if ($login < 0)
+       header("Location: index.php");
    
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
        if (empty($_POST["fund"])) {
@@ -33,7 +36,8 @@
 
        if (!$error){
            // Add to database
-           $fund = fundProject($dbconn, $uid, $pid, $fund);
+           $fund = fundProject($dbconn, $login, $pid, $fund, $_POST["product"]);
+           header("Location: project.php?pid=$pid");
        }
     }
 ?>
@@ -47,21 +51,26 @@
             include 'header.php';
         ?>
 
-        
-        <h2>Fund the Project</h2>
-        <p><span class="error">* required field.</span></p>
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]), "?pid=$pid&uid=$uid";?>">
+        <?php
+            $name = getProjectName($dbconn, $pid);
+            echo "<h2>Fund $name</h2>";
+        ?>
+        <p><span class="errortext">* required field.</span></p>
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]), "?pid=$pid";?>">
            Funding: <input type="text" name="fund" value="<?php echo $fund;?>">
-           <span class="error">* <?php echo $fundErr;?></span>
+           <span class="errortext">* <?php echo $fundErr;?></span>
+           <?php
+               if (hasBoth($dbconn, $pid)){
+                echo "<br>Funding Type:
+                       <select name='product'>
+                         <option value='0'>Donation</option>
+                         <option value='1'>Product</option>
+                       </select>";
+               }
+           ?>
            <br><br>
            <input type="submit" name="submit" value="Submit">
         </form>
-
-        <?php
-            echo "<h2>Your Input:</h2>";
-            echo $fund;
-            echo "<br>";
-        ?>
         
         <?
             include 'footer.php';

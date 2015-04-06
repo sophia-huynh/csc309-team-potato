@@ -1,5 +1,10 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
 ?>
 <html>
     <head>
@@ -11,9 +16,10 @@
             include 'header.php';
         ?>
         <center>
-        <a href ='makecommunity.php'><div class='tag'>Start a Community</div></a><br/>
         <?php
-            $result = pg_query($dbconn, "SELECT cid, name FROM community LIMIT 10");
+            if ($login >= 0)
+                echo "<a href ='makecommunity.php'><div class='tag'>Start a Community</div></a><br/>";
+            $result = pg_query($dbconn, "SELECT cid, name FROM community");
             if (!$result){
                 echo "An error occurred.\n";
                 exit;

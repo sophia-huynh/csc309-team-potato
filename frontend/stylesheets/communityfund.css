@@ -22,6 +22,21 @@ a {
     text-decoration: none;
 }
 
+.errortext{
+    color: red;
+}
+
+.error{
+    outline: none;
+    border-color: red;
+    box-shadow: 0 0 2px red;
+    transition: box-shadow linear 0.2s;
+}
+
+.error:focus{
+    box-shadow: none;
+    border-color: white;
+}
 /*
   ===== Rounded image div ==================================
   Usage: <div class="outer"><div class="image">...</div></div>
@@ -345,6 +360,17 @@ img.logo {
   /* font */
   font-family: Verdana, Geneva, sans-serif;
   font-size: 16px;
+}
+
+.rightcontainer{
+    float:right;
+    overflow:hidden;
+}
+
+.loginform{
+    padding:2px;
+    height: 26px;
+    border-radius: 5px;
 }
 
 /*

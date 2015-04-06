@@ -1,5 +1,10 @@
 <?php
-    include 'imports/imports.php'
+    include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
 ?>
 <html>
     <head>
@@ -14,8 +19,14 @@
         <center><a href ='makeproject.php'><div class='tag'>Start a Project</div></a></center>
         
         <?php
-            $result = pg_query($dbconn, "SELECT pid FROM project " .
-                                        "ORDER BY startdate desc LIMIT 10");
+            if ($login == -1){
+                $result = pg_query($dbconn, "SELECT pid FROM project " .
+                                            "ORDER BY startdate desc");
+            }else{
+                $result = pg_query($dbconn, "SELECT pid FROM usercommunity NATURAL JOIN projectcommunity " .
+                                            "NATURAL JOIN project WHERE uid = $login ".
+                                            "ORDER BY startdate desc");
+            }
             if (!$result){
                 echo "An error occurred.\n";
                 exit;

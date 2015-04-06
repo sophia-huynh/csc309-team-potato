@@ -34,13 +34,8 @@ create table project(
 create table funder(
         uid integer REFERENCES Users(uid),
         pid integer REFERENCES Project(pid),
-        amount money
-);
-
-create table buyer(
-        uid integer REFERENCES Users(uid),
-        pid integer REFERENCES Project(pid),
-        amount money
+        amount money,
+        bought boolean
 );
 
 create table initiator(
@@ -55,6 +50,11 @@ create table userreview(
         rating int,
         CONSTRAINT rating CHECK (rating IN (0, 1, 2, 3, 4, 5)),
         review varchar(1600)
+);
+
+create table funded(
+        pid integer REFERENCES Project(pid),
+        date timestamptz
 );
 
 create table projectreview(

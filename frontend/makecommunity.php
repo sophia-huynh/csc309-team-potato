@@ -1,9 +1,19 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     // define variables and set to empty values
     $cnameErr = "";
     $cname = "";
     $error = False;
+
+    if ($login < 0)
+        header("Location: index.php");
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
        if (empty($_POST["cname"])) {
@@ -19,14 +29,11 @@
        }
 
        if (!$error){
-           // Add to database
-           if (isset($_GET['uid'])){
-               $uid = $_GET['uid'];
-           }
-           else{
-             $uid = 2;
-           }
-           $cname = createCommunity($dbconn, $cname, $uid);
+           $cid = createCommunity($dbconn, $cname, $login);
+           if ($cid < 0)
+               $cnameErr = "Community name already taken";
+           else
+               header("Location: communityexplorer.php?cid=$cid");
        }
     }
 ?>
@@ -42,19 +49,13 @@
 
         
         <h2>Create Your Community</h2>
-        <p><span class="error">* required field.</span></p>
+        <p><span class="errortext">* required field.</span></p>
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
            Community Name: <input type="text" name="cname" value="<?php echo $cname;?>">
-           <span class="error">* <?php echo $cnameErr;?></span>
+           <span class="errortext">* <?php echo $cnameErr;?></span>
            <br><br>
            <input type="submit" name="submit" value="Submit">
         </form>
-
-        <?php
-            echo "<h2>Your Input:</h2>";
-            echo $cname;
-            echo "<br>";
-        ?>
         
         <?
             include 'footer.php';

@@ -11,9 +11,9 @@ INSERT INTO Project(name, goal, startdate, enddate, description, image, product,
 INSERT INTO Project(name, goal, startdate, enddate, description, image, product, donation) VALUES ('Apple Snax', 2500, (select TIMESTAMP 'yesterday'), (select TIMESTAMP 'tomorrow' + interval '5 days'), 'Description for AppleSnax', 'http://puu.sh/gv9SP/3c705728e4.png', True, True);
 INSERT INTO Project(name, goal, startdate, enddate, description, image, product, donation) VALUES ('Peeta Snax', 2500, (select TIMESTAMP 'yesterday'), (select TIMESTAMP 'tomorrow' + interval '10 days'), 'Description for Peeta', 'http://puu.sh/gv9Wf/bd6ebe126d.png', True, False);
 
-INSERT INTO Funder VALUES (2, 1, 100);
-INSERT INTO Funder VALUES (1, 2, 500);
-INSERT INTO Buyer VALUES (1, 2, 500);
+INSERT INTO Funder VALUES (2, 1, 100, False);
+INSERT INTO Funder VALUES (1, 2, 500, False);
+INSERT INTO Funder VALUES (1, 2, 500, True);
 
 INSERT INTO Initiator VALUES (1, 1);
 INSERT INTO Initiator VALUES (2, 2);

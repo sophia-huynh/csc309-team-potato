@@ -1,5 +1,12 @@
 <?php
     include 'imports/imports.php';
+    session_name('communityfund');
+    session_start();
+    $login = -1;
+    if (isset($_SESSION['uid']))
+        $login = $_SESSION['uid'];
+?>
+<?php
     // define variables and set to empty values
     $pnameErr = $urlErr = $descrErr = $goalErr = $deadlineErr = $communityErr = $productErr = "";
     $pname = $url = $descr = $goal = $deadline = $community = $donation = $product = "";
@@ -83,14 +90,17 @@
        }
        
        if (!$error){
-           // Add to database
-           if (isset($_GET['uid'])){
-               $uid = $_GET['uid'];
+           if ($login < 0){
+                header("Location: index.php");
+           }else{
+                $project = createProject($dbconn, $pname, $url, $descr, $goal, $deadline, $community, $type, $login);
+                if ($project >= 0){
+                    header("Location: project.php?pid=$project");
+                }else{
+                    $pnameErr = "Name already exists";
+                }
+                
            }
-           else{
-             $uid = 2;
-           }
-           $community = createProject($dbconn, $pname, $url, $descr, $goal, $deadline, $community, $type, $uid);
        }
     }
 ?>
@@ -106,28 +116,28 @@
 
         
         <h2>Create Your Project</h2>
-        <p><span class="error">* required field.</span></p>
+        <p><span class="errortext">* required field.</span></p>
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
            Project Name: <input type="text" name="pname" value="<?php echo $pname;?>">
-           <span class="error">* <?php echo $pnameErr;?></span>
+           <span class="errortext">* <?php echo $pnameErr;?></span>
            <br><br>
            Project Image URL: <input type="text" name="url" value="<?php echo $url;?>">
-           <span class="error"><?php echo $urlErr;?></span>
+           <span class="errortext">* <?php echo $urlErr;?></span>
            <br><br>
            Project Description: <textarea name="descr" rows="5" cols="40"><?php echo $descr;?></textarea>
-           <span class="error">* <?php echo $descrErr;?></span>
+           <span class="errortext">* <?php echo $descrErr;?></span>
            <br><br>
            Funding Goal: <input type="text" name="goal" value="<?php echo $goal;?>">
-           <span class="error">* <?php echo $goalErr;?></span>
+           <span class="errortext">* <?php echo $goalErr;?></span>
            <br><br>
            Days Until Deadline: <input type="text" name="deadline" value="<?php echo $deadline;?>">
-           <span class="error">* <?php echo $deadlineErr;?></span>
+           <span class="errortext">* <?php echo $deadlineErr;?></span>
            <br><br>
            Community:
-           <select name="community">
-             <?php listFormCommunities($dbconn);?>
+           <select name="community" value="<?php echo $community;?>">
+             <?php listFormCommunities($dbconn, $login);?>
            </select>
-           <span class="error">* <?php echo $communityErr;?></span>
+           <span class="errortext">* <?php echo $communityErr;?></span>
            <br><br>
            Project Type:
            <select name="product">
@@ -135,26 +145,10 @@
              <option value="product">Product</option>
              <option value="both">Both</option>
            </select>
-           <span class="error">* <?php echo $productErr;?></span>
+           <span class="errortext">* <?php echo $productErr;?></span>
            <br><br>
            <input type="submit" name="submit" value="Submit">
         </form>
-
-        <?php
-            echo "<h2>Your Input:</h2>";
-            echo $pname;
-            echo "<br>";
-            echo "<img src='$url' alt='imageurl' style='width:300px;height:300px'>";
-            echo $url;
-            echo "<br>";
-            echo $descr;
-            echo "<br>";
-            echo $goal;
-            echo "<br>";
-            echo $deadline;
-            echo "<br>";
-            echo $community;
-        ?>
         
         <?
             include 'footer.php';
